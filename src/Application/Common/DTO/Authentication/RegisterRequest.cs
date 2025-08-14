@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Common.DTO
+namespace Application.Common.DTO.Authentication
 {
     public class RegisterRequest
     {

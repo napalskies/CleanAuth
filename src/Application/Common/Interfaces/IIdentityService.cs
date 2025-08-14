@@ -1,4 +1,4 @@
-﻿using Application.Common.DTO;
+﻿using Application.Common.DTO.Authentication;
 using Application.Common.Models;
 using System;
 using System.Collections.Generic;
