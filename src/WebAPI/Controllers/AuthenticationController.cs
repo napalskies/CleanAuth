@@ -1,4 +1,4 @@
-﻿using Application.Common.DTO;
+﻿using Application.Common.DTO.Authentication;
 using Application.Common.Interfaces;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +26,19 @@ namespace WebAPI.Controllers
             if (result.Succeeded)
             {
                 return Ok("User registered successfully.");
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            var result = await _identityService.LoginAsync(loginRequest);
+
+            if (result.Succeeded)
+            {
+                return Ok("User logged in successfully.");
             }
 
             return BadRequest(result.Errors);

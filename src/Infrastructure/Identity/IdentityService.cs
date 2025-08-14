@@ -1,4 +1,4 @@
-﻿using Application.Common.DTO;
+﻿using Application.Common.DTO.Authentication;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Microsoft.AspNetCore.Identity;
@@ -62,9 +62,38 @@ namespace Infrastructure.Identity
 
         }
 
-        public Task<Result> LoginAsync(LoginRequest login)
+        public async Task<Result> LoginAsync(LoginRequest loginRequest)
         {
-            throw new NotImplementedException();
+            var result = new Result();
+
+            if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
+            {
+                result.Succeeded = false;
+                result.Errors = new[] { "Username and password cannot be empty." };
+                return result;
+            }
+
+            var user = await _userManager.FindByNameAsync(loginRequest.Username);
+
+            if (user == null)
+            {
+                result.Succeeded = false;
+                result.Errors = ["User does not exist."];
+                return result;
+            }
+
+            var loginResult = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, false);
+
+            if (!loginResult.Succeeded)
+            {
+                result.Succeeded = false;
+                result.Errors = ["Password is incorrect."];
+                return result;
+            }
+
+            await _signInManager.SignInAsync(user, true);
+
+            return result;
         }
 
         private async Task<Result> AddToRoleAsync(ApplicationUser user, string roleName)
