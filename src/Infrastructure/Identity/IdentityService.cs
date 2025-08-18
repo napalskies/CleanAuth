@@ -1,6 +1,6 @@
 ﻿using Application.Common.DTO.Authentication;
-using Application.Common.Interfaces;
 using Application.Common.Models;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Identity
