@@ -1,5 +1,5 @@
 ﻿using Application.Common.DTO.Authentication;
-using Application.Common.Interfaces;
+using Application.Interfaces.Services;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +12,12 @@ namespace WebAPI.Controllers
     {
 
         private readonly IIdentityService _identityService;
+        private readonly ITokenService _tokenService;
 
-        public AuthenticationController(IIdentityService identityService)
+        public AuthenticationController(IIdentityService identityService, ITokenService tokenService)
         {
             _identityService = identityService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -36,14 +38,15 @@ namespace WebAPI.Controllers
         {
             var result = await _identityService.LoginAsync(loginRequest);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                return Ok("User logged in successfully.");
+                return BadRequest(result.Errors);
             }
 
-            return BadRequest(result.Errors);
-        }
+            var token = _tokenService.GenerateJwt(loginRequest);
 
+            return Ok(token); 
+        }
 
     }
 }
