@@ -43,9 +43,9 @@ namespace WebAPI.Controllers
                 return BadRequest(result.Errors);
             }
 
-            var token = _tokenService.GenerateJwt(loginRequest);
+            var tokens = await _tokenService.GetTokensAsync(loginRequest.Username);
 
-            return Ok(token); 
+            return Ok(tokens); 
         }
 
     }

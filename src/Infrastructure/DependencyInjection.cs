@@ -1,6 +1,8 @@
 ﻿using Application.Common.Helpers;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Infrastructure.Data;
+using Infrastructure.Data.Repositories;
 using Infrastructure.Identity;
 using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,6 +57,7 @@ public static class DependencyInjection
 
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITokenRepository, TokenRepository>();
 
         return services;
     }

@@ -47,3 +47,11 @@ bld/
 *.pfx
 *.publishsettings
 node_modules/
+/src/Domain/Class1.cs
+/src/Infrastructure/Data/Entities/RefreshTokenEntity.cs
+/src/WebAPI/appsettings.Development.json
+/src/WebAPI/appsettings.json
+/src/WebAPI/Presentation.http
+/src/WebAPI/Properties/launchSettings.json
+/Directory.Build.props
+/.editorconfig

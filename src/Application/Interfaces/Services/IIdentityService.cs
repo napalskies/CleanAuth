@@ -11,6 +11,8 @@ namespace Application.Interfaces.Services
     public interface IIdentityService
     {
         Task<Result> CreateAsync(RegisterRequest registerRequest);
-        Task<Result> LoginAsync(LoginRequest registerRequest);
+        Task<Result> LoginAsync(LoginRequest registerRequest); 
+        Task<string> GetUserIdByUsernameAsync(string username);
+        Task<List<string>> GetUserRolesAsync(string username);
     }
 }

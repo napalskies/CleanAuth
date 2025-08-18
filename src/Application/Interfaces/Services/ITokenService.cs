@@ -9,9 +9,10 @@ namespace Application.Interfaces.Services
 {
     public interface ITokenService
     {
-        string GenerateJwt(LoginRequest loginRequest);
+        Task<TokenResponse> GetTokensAsync(string username);
+        Task<string> GenerateJwt(string username);
         string GetRefreshToken();
-        void StoreRefreshToken(string refreshToken);
+        Task<string> StoreRefreshToken(string username);
         void UpdateRefreshToken(string refreshToken);
         void DeleteRefreshToken(string refreshToken);
     }

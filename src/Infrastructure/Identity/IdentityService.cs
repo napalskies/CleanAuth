@@ -133,5 +133,35 @@ namespace Infrastructure.Identity
 
             return result;
         }
+
+        public async Task<string> GetUserIdByUsernameAsync(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+            return user.Id;
+        }
+
+        public async Task<List<string>> GetUserRolesAsync(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if (roles.Count == 0)
+            {
+                throw new ArgumentException("User has no roles assigned.");
+            }
+            
+            return roles.ToList();
+        }
+
     }
 }
