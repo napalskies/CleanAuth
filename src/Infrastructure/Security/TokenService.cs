@@ -16,29 +16,19 @@ namespace Infrastructure.Security
     public class TokenService : ITokenService
     {
         private readonly JwtOptions _jwtOptions;
-        private readonly IIdentityService _identityService;
         private readonly ITokenRepository _tokenRepository;
 
-        public TokenService(IOptions<JwtOptions> jwtOptions, IIdentityService identityService, ITokenRepository tokenRepository) {
+        public TokenService(IOptions<JwtOptions> jwtOptions, ITokenRepository tokenRepository) {
 
             _jwtOptions = jwtOptions.Value;
-            _identityService = identityService;
             _tokenRepository = tokenRepository;
         }
 
-        public async Task<TokenResponse> GetTokensAsync(string username)
-        {
-            var jwtToken = await GenerateJwt(username);
-            var refreshToken = await StoreRefreshToken(username);
-            return new TokenResponse { JwtToken = jwtToken, RefreshToken = refreshToken};
-        }
-
-        public async Task<string> GenerateJwt(string username)
+        public string GenerateJwt(string username, IEnumerable<string> roles)
         {
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
             var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
-            var roles = await _identityService.GetUserRolesAsync(username);
             var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToArray();
 
             var claims = new Claim[]
@@ -60,14 +50,8 @@ namespace Infrastructure.Security
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string GetRefreshToken()
+        public async Task<string> StoreRefreshTokenAsync(string username, string userId)
         {
-            return Guid.NewGuid().ToString();
-        }
-
-        public async Task<string> StoreRefreshToken(string username)
-        {
-            var userId = await _identityService.GetUserIdByUsernameAsync(username);
             string token = GetRefreshToken();
             var refreshToken = new RefreshToken
             {
@@ -88,6 +72,10 @@ namespace Infrastructure.Security
         public void DeleteRefreshToken(string refreshToken)
         {
             throw new NotImplementedException();
+        }
+        private string GetRefreshToken()
+        {
+            return Guid.NewGuid().ToString();
         }
     }
 }

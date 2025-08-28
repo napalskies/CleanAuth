@@ -9,10 +9,8 @@ namespace Application.Interfaces.Services
 {
     public interface ITokenService
     {
-        Task<TokenResponse> GetTokensAsync(string username);
-        Task<string> GenerateJwt(string username);
-        string GetRefreshToken();
-        Task<string> StoreRefreshToken(string username);
+        string GenerateJwt(string username, IEnumerable<string> roles);
+        Task<string> StoreRefreshTokenAsync(string username, string userId);
         void UpdateRefreshToken(string refreshToken);
         void DeleteRefreshToken(string refreshToken);
     }

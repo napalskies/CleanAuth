@@ -12,12 +12,10 @@ namespace WebAPI.Controllers
     {
 
         private readonly IIdentityService _identityService;
-        private readonly ITokenService _tokenService;
 
-        public AuthenticationController(IIdentityService identityService, ITokenService tokenService)
+        public AuthenticationController(IIdentityService identityService)
         {
             _identityService = identityService;
-            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -36,16 +34,9 @@ namespace WebAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
-            var result = await _identityService.LoginAsync(loginRequest);
+            var tokenResult = await _identityService.LoginAsync(loginRequest);
 
-            if (!result.Succeeded)
-            {
-                return BadRequest(result.Errors);
-            }
-
-            var tokens = await _tokenService.GetTokensAsync(loginRequest.Username);
-
-            return Ok(tokens); 
+            return Ok(tokenResult); 
         }
 
     }

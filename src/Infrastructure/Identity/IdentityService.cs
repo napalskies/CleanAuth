@@ -2,6 +2,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
+using System.Data;
+using System.Security.Claims;
 
 namespace Infrastructure.Identity
 {
@@ -11,12 +13,14 @@ namespace Infrastructure.Identity
         private UserManager<ApplicationUser> _userManager;
         private SignInManager<ApplicationUser> _signInManager;
         private RoleManager<IdentityRole> _roleManager;
+        private ITokenService _tokenService;
 
-        public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
+        public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _tokenService = tokenService;
         }
 
         public async Task<Result> CreateAsync(RegisterRequest registerRequest)
@@ -26,7 +30,7 @@ namespace Infrastructure.Identity
             if (string.IsNullOrEmpty(registerRequest.Username) || string.IsNullOrEmpty(registerRequest.Password))
             {
                 result.Succeeded = false;
-                result.Errors = new[] { "Username and password cannot be empty." };
+                result.Errors = ["Username and password cannot be empty."];
                 return result;
             }
 
@@ -62,38 +66,36 @@ namespace Infrastructure.Identity
 
         }
 
-        public async Task<Result> LoginAsync(LoginRequest loginRequest)
+        public async Task<TokenResponse> LoginAsync(LoginRequest loginRequest)
         {
-            var result = new Result();
-
             if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
             {
-                result.Succeeded = false;
-                result.Errors = new[] { "Username and password cannot be empty." };
-                return result;
+                throw new Exception("Username and password cannot be empty.");
             }
 
             var user = await _userManager.FindByNameAsync(loginRequest.Username);
 
             if (user == null)
             {
-                result.Succeeded = false;
-                result.Errors = ["User does not exist."];
-                return result;
+                throw new Exception("User not found.");
             }
 
             var loginResult = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, false);
 
             if (!loginResult.Succeeded)
             {
-                result.Succeeded = false;
-                result.Errors = ["Password is incorrect."];
-                return result;
+                throw new Exception("Invalid password.");
             }
 
             await _signInManager.SignInAsync(user, true);
 
-            return result;
+            var roles = await _userManager.GetRolesAsync(user); 
+
+            var jwtToken = _tokenService.GenerateJwt(loginRequest.Username, [.. roles]);
+
+            var refreshToken = await _tokenService.StoreRefreshTokenAsync(loginRequest.Username, user.Id);
+
+            return new TokenResponse { JwtToken = jwtToken, RefreshToken = refreshToken };
         }
 
         private async Task<Result> AddToRoleAsync(ApplicationUser user, string roleName)
