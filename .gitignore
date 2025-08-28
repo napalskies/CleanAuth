@@ -48,7 +48,6 @@ bld/
 *.publishsettings
 node_modules/
 /src/Domain/Class1.cs
-/src/Infrastructure/Data/Entities/RefreshTokenEntity.cs
 /src/WebAPI/appsettings.Development.json
 /src/WebAPI/appsettings.json
 /src/WebAPI/Presentation.http
