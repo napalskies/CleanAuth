@@ -13,7 +13,7 @@ namespace Infrastructure.Identity
         private UserManager<ApplicationUser> _userManager;
         private SignInManager<ApplicationUser> _signInManager;
         private RoleManager<IdentityRole> _roleManager;
-        private ITokenService _tokenService;
+        private ITokenService _tokenService; 
 
         public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService)
         {
