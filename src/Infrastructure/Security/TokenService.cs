@@ -1,13 +1,10 @@
-﻿using Application.Common.DTO.Authentication;
-using Application.Common.Helpers;
+﻿using Application.Common.Helpers;
 using Application.Interfaces.Services;
 using Microsoft.Extensions.Options;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using Application.Common.DTO.Security;
-using System.Linq;
 using Application.Interfaces.Repositories;
 using Application.Common.Models;
 

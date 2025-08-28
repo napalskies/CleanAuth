@@ -1,4 +1,4 @@
-﻿using Application.Common.DTO.Security;
+﻿using Infrastructure.Data.Entities;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

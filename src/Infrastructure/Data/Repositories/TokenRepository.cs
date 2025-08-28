@@ -1,11 +1,6 @@
-﻿using Application.Common.DTO.Security;
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Infrastructure.Data.Entities;
 
 namespace Infrastructure.Data.Repositories
 {
