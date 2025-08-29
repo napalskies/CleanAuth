@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Application.Interfaces.Repositories;
 using Application.Common.Models;
+using Infrastructure.Data.Entities;
 
 namespace Infrastructure.Security
 {
@@ -62,14 +63,46 @@ namespace Infrastructure.Security
             return token;
         }
 
-        public void UpdateRefreshToken(string refreshToken)
+        public async Task<string> UpdateRefreshTokenAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(refreshToken)) {
+                return string.Empty;
+            }
+            var token = await _tokenRepository.GetRefreshTokenAsync(refreshToken);
+            if (token == null)
+            {
+                return string.Empty;
+            }
+
+            var newToken = new RefreshToken()
+            {
+                Token = GetRefreshToken(),
+                UserId = token.UserId,
+                ExpiryDate = DateTime.Now.AddDays(15),
+                Revoked = false
+            };
+
+            _tokenRepository.UpdateRefreshToken(token, newToken);
+
+            return newToken.Token;
         }
+
+
         public void DeleteRefreshToken(string refreshToken)
         {
             throw new NotImplementedException();
         }
+
+        public async Task<string> GetUserIdAsync(string refreshToken)
+        {
+            var token = await _tokenRepository.GetRefreshTokenAsync(refreshToken);
+            if (token == null)
+            {
+                throw new Exception("Invalid refresh token");
+            }
+            return token.UserId;
+        }
+
         private string GetRefreshToken()
         {
             return Guid.NewGuid().ToString();

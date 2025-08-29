@@ -11,7 +11,8 @@ namespace Application.Interfaces.Services
     {
         string GenerateJwt(string username, IEnumerable<string> roles);
         Task<string> StoreRefreshTokenAsync(string username, string userId);
-        void UpdateRefreshToken(string refreshToken);
+        Task<string> UpdateRefreshTokenAsync(string refreshToken);
         void DeleteRefreshToken(string refreshToken);
+        Task<string> GetUserIdAsync(string refreshToken);
     }
 }

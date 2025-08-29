@@ -13,14 +13,12 @@ namespace Infrastructure.Identity
         private UserManager<ApplicationUser> _userManager;
         private SignInManager<ApplicationUser> _signInManager;
         private RoleManager<IdentityRole> _roleManager;
-        private ITokenService _tokenService; 
 
-        public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService)
+        public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-            _tokenService = tokenService;
         }
 
         public async Task<Result> CreateAsync(RegisterRequest registerRequest)
@@ -66,7 +64,7 @@ namespace Infrastructure.Identity
 
         }
 
-        public async Task<TokenResponse> LoginAsync(LoginRequest loginRequest)
+        public async Task ValidateUserAsync(LoginRequest loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
             {
@@ -88,14 +86,6 @@ namespace Infrastructure.Identity
             }
 
             await _signInManager.SignInAsync(user, true);
-
-            var roles = await _userManager.GetRolesAsync(user); 
-
-            var jwtToken = _tokenService.GenerateJwt(loginRequest.Username, [.. roles]);
-
-            var refreshToken = await _tokenService.StoreRefreshTokenAsync(loginRequest.Username, user.Id);
-
-            return new TokenResponse { JwtToken = jwtToken, RefreshToken = refreshToken };
         }
 
         private async Task<Result> AddToRoleAsync(ApplicationUser user, string roleName)

@@ -1,8 +1,7 @@
 ﻿using Application.Common.DTO.Authentication;
 using Application.Interfaces.Services;
-using Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace WebAPI.Controllers
 {
@@ -10,12 +9,13 @@ namespace WebAPI.Controllers
     [Route("api/[controller]")]
     public class AuthenticationController : ControllerBase
     {
-
         private readonly IIdentityService _identityService;
+        private readonly ITokenService _tokenService;
 
-        public AuthenticationController(IIdentityService identityService)
+        public AuthenticationController(IIdentityService identityService, ITokenService tokenService)
         {
             _identityService = identityService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -34,9 +34,37 @@ namespace WebAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
-            var tokenResult = await _identityService.LoginAsync(loginRequest);
+            await _identityService.ValidateUserAsync(loginRequest);
 
-            return Ok(tokenResult); 
+            //if validation fails, an exception will be thrown
+            
+            var roles = await _identityService.GetUserRolesAsync(loginRequest.Username);
+            var userId = await _identityService.GetUserIdByUsernameAsync(loginRequest.Username);
+
+            var jwtToken = _tokenService.GenerateJwt(loginRequest.Username, [.. roles]);
+
+            var refreshToken = await _tokenService.StoreRefreshTokenAsync(loginRequest.Username, userId);
+
+            return Ok(new TokenResponse { JwtToken = jwtToken, RefreshToken = refreshToken });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            string newRefreshToken = await _tokenService.UpdateRefreshTokenAsync(refreshToken);
+
+            if (string.IsNullOrEmpty(newRefreshToken))
+            {
+                return BadRequest("Invalid refresh token.");
+            }
+
+            var userId = await _tokenService.GetUserIdAsync(refreshToken);
+            var username = await _identityService.GetUserIdByUsernameAsync(userId);
+            var roles = await _identityService.GetUserRolesAsync(username);
+
+            var newJwt = _tokenService.GenerateJwt(username, [.. roles]);
+
+            return Ok(new TokenResponse { JwtToken = newJwt, RefreshToken = newRefreshToken });
         }
 
     }

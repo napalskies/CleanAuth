@@ -1,6 +1,7 @@
 ﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Infrastructure.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories
 {
@@ -13,6 +14,18 @@ namespace Infrastructure.Data.Repositories
             _context = context;
         }
 
+        public async Task<RefreshToken> GetRefreshTokenAsync(string refreshToken)
+        {
+            var token = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
+            if (token == null) return null;
+            return new RefreshToken
+            {
+                Token = token.Token,
+                UserId = token.UserId,
+                ExpiryDate = token.ExpiryDate,
+                Revoked = token.Revoked
+            };
+        }
         public async Task StoreRefreshTokenAsync(RefreshToken refreshToken)
         {
             var refreshTokenEntity = new RefreshTokenEntity 
@@ -26,9 +39,9 @@ namespace Infrastructure.Data.Repositories
             await _context.RefreshTokens.AddAsync(refreshTokenEntity);
         }
 
-        public void UpdateRefreshToken(RefreshToken oldToken, RefreshToken newToken)
+        public async void UpdateRefreshToken(RefreshToken oldToken, RefreshToken newToken)
         {
-            var existingToken = _context.RefreshTokens.FirstOrDefault(rt => rt.Token == oldToken.Token && rt.UserId == oldToken.UserId);
+            var existingToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == oldToken.Token && rt.UserId == oldToken.UserId);
             var newTokenEntity = new RefreshTokenEntity
             {
                 Id = existingToken.Id,
