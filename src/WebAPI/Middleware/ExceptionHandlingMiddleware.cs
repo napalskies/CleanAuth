@@ -5,11 +5,19 @@ namespace WebAPI.Middleware
 {
     public class ExceptionHandlingMiddleware
     {
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+
+        public readonly RequestDelegate _next;
+
+        public ExceptionHandlingMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
+
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await next(context);
+                await _next(context);
             }
             catch (InvalidCredentialException)
             {
